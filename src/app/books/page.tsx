@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../../lib/axios";
 import Link from "next/link";
 import { FcGenericSortingAsc, FcGenericSortingDesc } from "react-icons/fc";
-import { FaRegEdit, FaSearch } from "react-icons/fa";
+import { FaRegEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { GrFormPrevious, GrFormNext } from "react-icons/gr";
+import Table from "../../components/Table";
+import Pagination from "../../components/Pagination";
 
 // Definisi Interface
 interface RelationalData {
@@ -121,7 +122,7 @@ export default function BooksPage() {
     try {
       await axiosInstance.delete(`/books/${id}`);
       fetchBooks();
-    } catch (error) {
+    } catch {
       alert("Failed to delete data.");
     }
   };
@@ -140,6 +141,52 @@ export default function BooksPage() {
       <FcGenericSortingDesc className="inline ml-2" size={18} />
     );
   };
+
+  const columns = [
+    {
+      key: "id",
+      label: <div className="flex items-center">ID {renderSortIcon("id")}</div>,
+      className:
+        "p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group",
+      onClick: () => handleSort("id"),
+    },
+    {
+      key: "title",
+      label: (
+        <div className="flex items-center">Title {renderSortIcon("title")}</div>
+      ),
+      className:
+        "p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group",
+      onClick: () => handleSort("title"),
+    },
+    {
+      key: "author_id",
+      label: (
+        <div className="flex items-center">
+          Author {renderSortIcon("author_id")}
+        </div>
+      ),
+      className:
+        "p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group",
+      onClick: () => handleSort("author_id"),
+    },
+    {
+      key: "publisher_id",
+      label: (
+        <div className="flex items-center">
+          Publisher {renderSortIcon("publisher_id")}
+        </div>
+      ),
+      className:
+        "p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group",
+      onClick: () => handleSort("publisher_id"),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "p-4 font-semibold text-center",
+    },
+  ];
 
   return (
     <div className="p-8">
@@ -211,119 +258,51 @@ export default function BooksPage() {
         </form>
 
         {/* Tabel Books */}
-        {isLoading ? (
-          <p className="text-center text-gray-500 py-8">Loading data...</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                  <th
-                    className="p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group"
-                    onClick={() => handleSort("id")}
+        <Table
+          columns={columns}
+          emptyMessage="Book data not found."
+          emptyColSpan={5}
+          isLoading={isLoading}
+        >
+          {books.map((book) => (
+            <tr
+              key={book.id}
+              className="hover:bg-gray-50 border-b border-gray-100"
+            >
+              <td className="p-4 text-gray-600">{book.id}</td>
+              <td className="p-4 text-gray-900 font-medium">{book.title}</td>
+              <td className="p-4 text-gray-900">{book.author?.name || "-"}</td>
+              <td className="p-4 text-gray-900">
+                {book.publisher?.name || "-"}
+              </td>
+              <td className="p-4 text-center whitespace-nowrap">
+                <div className="inline-flex items-center justify-center gap-2">
+                  <Link
+                    href={`/books/edit/${book.id}`}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
+                    title="Edit"
                   >
-                    <div className="flex items-center">
-                      ID {renderSortIcon("id")}
-                    </div>
-                  </th>
-                  <th
-                    className="p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group"
-                    onClick={() => handleSort("title")}
+                    <FaRegEdit size={16} />
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(book.id)}
+                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
+                    title="Hapus"
                   >
-                    <div className="flex items-center">
-                      Title {renderSortIcon("title")}
-                    </div>
-                  </th>
-                  <th
-                    className="p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group"
-                    onClick={() => handleSort("author_id")}
-                  >
-                    <div className="flex items-center">
-                      Author {renderSortIcon("author_id")}
-                    </div>
-                  </th>
-                  <th
-                    className="p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none group"
-                    onClick={() => handleSort("publisher_id")}
-                  >
-                    <div className="flex items-center">
-                      Publisher {renderSortIcon("publisher_id")}
-                    </div>
-                  </th>
-                  <th className="p-4 font-semibold text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {books.length > 0 ? (
-                  books.map((book) => (
-                    <tr
-                      key={book.id}
-                      className="hover:bg-gray-50 border-b border-gray-100"
-                    >
-                      <td className="p-4 text-gray-600">{book.id}</td>
-                      <td className="p-4 text-gray-900 font-medium">
-                        {book.title}
-                      </td>
-                      <td className="p-4 text-gray-900">
-                        {book.author?.name || "-"}
-                      </td>
-                      <td className="p-4 text-gray-900">
-                        {book.publisher?.name || "-"}
-                      </td>
-                      <td className="p-4 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center justify-center gap-2">
-                          <Link
-                            href={`/books/edit/${book.id}`}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
-                            title="Edit"
-                          >
-                            <FaRegEdit size={16} />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(book.id)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
-                            title="Hapus"
-                          >
-                            <MdDeleteOutline size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-gray-500">
-                      Book data not found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+                    <MdDeleteOutline size={16} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </Table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            disabled={page === 1}
-            className="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 inline-flex items-center justify-center"
-            title="Previous"
-          >
-            <GrFormPrevious size={18} />
-          </button>
-          <span className="text-gray-600 text-sm font-medium">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-            disabled={page === totalPages || totalPages === 0}
-            className="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 inline-flex items-center justify-center"
-            title="Next"
-          >
-            <GrFormNext size={18} />
-          </button>
-        </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );

@@ -17,12 +17,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          {/* Flexbox agar Sidebar dan Konten berdampingan */}
           <div className="flex h-screen bg-gray-50 overflow-hidden">
-            {/* Sidebar akan otomatis hilang di halaman Login/Register */}
             <Sidebar />
-
-            {/* Area Konten Utama yang bisa di-scroll */}
             <main className="flex-1 overflow-y-auto">{children}</main>
           </div>
         </AuthProvider>

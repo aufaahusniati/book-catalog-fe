@@ -10,7 +10,6 @@ export default function Home() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Keamanan: Tendang user ke halaman login jika tidak ada token
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -19,7 +18,6 @@ export default function Home() {
     }
   }, [router]);
 
-  // Tampilkan loading screen sementara mengecek status token
   if (isChecking || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -42,7 +40,6 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Kamu bisa menambahkan ringkasan/statistik di bawah sini nantinya */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
           <h3 className="text-lg font-bold text-blue-800">List Books</h3>

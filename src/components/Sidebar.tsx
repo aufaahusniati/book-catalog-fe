@@ -6,23 +6,20 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
-  const pathname = usePathname(); // Untuk mengecek URL saat ini
+  const pathname = usePathname();
 
-  // Jika user belum login (berada di halaman login/register), sembunyikan Sidebar
   if (!user) return null;
 
-  // Sembunyikan sidebar di halaman login dan register
   if (pathname === "/login" || pathname === "/register") return null;
 
   return (
     <aside className="w-64 bg-[#5a4633] text-white h-screen flex flex-col shadow-lg flex-shrink-0">
-      {/* Header Sidebar */}
       <div className="p-6 border-b border-gray-800">
         <h2 className="text-2xl font-bold text-[#f2e7d4]">Book Catalog</h2>
         <p className="text-sm text-[#c7ad84] mt-2">Halo, {user.name}!</p>
       </div>
 
-      {/* Menu Navigasi */}
+      {/* Navi */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         <Link
           href="/"
@@ -50,7 +47,7 @@ export default function Sidebar() {
         </Link>
       </nav>
 
-      {/* Tombol Logout di Bawah */}
+      {/* Logout */}
       <div className="p-4 border-t border-gray-800">
         <button
           onClick={logout}

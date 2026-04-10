@@ -7,7 +7,8 @@ import { FcGenericSortingAsc, FcGenericSortingDesc } from "react-icons/fc";
 import { FaRegEdit, FaSearch } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { GrFormPrevious, GrFormNext } from "react-icons/gr";
+import Table from "../../components/Table";
+import Pagination from "../../components/Pagination";
 
 interface Publisher {
   id: number;
@@ -66,7 +67,7 @@ export default function PublishersPage() {
     try {
       await axiosInstance.delete(`/publishers/${id}`);
       fetchPublishers();
-    } catch (error) {
+    } catch {
       alert("Failed to delete data.");
     }
   };
@@ -85,6 +86,37 @@ export default function PublishersPage() {
       <FcGenericSortingDesc className="inline ml-2" size={18} />
     );
   };
+
+  const columns = [
+    {
+      key: "id",
+      label: <div className="flex items-center">ID {renderSortIcon("id")}</div>,
+      className:
+        "p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none transition group",
+      onClick: () => handleSort("id"),
+    },
+    {
+      key: "name",
+      label: (
+        <div className="flex items-center">
+          Publisher Name {renderSortIcon("name")}
+        </div>
+      ),
+      className:
+        "p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none transition group",
+      onClick: () => handleSort("name"),
+    },
+    {
+      key: "address",
+      label: "Address",
+      className: "p-4 font-semibold",
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "p-4 font-semibold text-center",
+    },
+  ];
 
   return (
     <div className="p-8">
@@ -116,99 +148,44 @@ export default function PublishersPage() {
           </button>
         </form>
 
-        {isLoading ? (
-          <p className="text-center text-gray-500 py-8">Loading data...</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                  <th
-                    className="p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none transition group"
-                    onClick={() => handleSort("id")}
+        <Table
+          columns={columns}
+          emptyMessage="Data not found."
+          emptyColSpan={4}
+          isLoading={isLoading}
+        >
+          {publishers.map((publisher) => (
+            <tr
+              key={publisher.id}
+              className="hover:bg-gray-50 border-b border-gray-100"
+            >
+              <td className="p-4 text-gray-600">{publisher.id}</td>
+              <td className="p-4 text-gray-900 font-medium">
+                {publisher.name}
+              </td>
+              <td className="p-4 text-gray-600">{publisher.address || "-"}</td>
+              <td className="p-4 text-center whitespace-nowrap">
+                <div className="inline-flex items-center justify-center gap-2">
+                  <Link
+                    href={`/publishers/edit/${publisher.id}`}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
+                    title="Edit"
                   >
-                    <div className="flex items-center">
-                      ID {renderSortIcon("id")}
-                    </div>
-                  </th>
-                  <th
-                    className="p-4 font-semibold cursor-pointer hover:bg-gray-200 select-none transition group"
-                    onClick={() => handleSort("name")}
+                    <FaRegEdit size={16} />
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(publisher.id)}
+                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
+                    title="Delete"
                   >
-                    <div className="flex items-center">
-                      Publisher Name {renderSortIcon("name")}
-                    </div>
-                  </th>
-                  <th className="p-4 font-semibold">Address</th>
-                  <th className="p-4 font-semibold text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {publishers.length > 0 ? (
-                  publishers.map((publisher) => (
-                    <tr
-                      key={publisher.id}
-                      className="hover:bg-gray-50 border-b border-gray-100"
-                    >
-                      <td className="p-4 text-gray-600">{publisher.id}</td>
-                      <td className="p-4 text-gray-900 font-medium">
-                        {publisher.name}
-                      </td>
-                      <td className="p-4 text-gray-600">
-                        {publisher.address || "-"}
-                      </td>
-                      <td className="p-4 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center justify-center gap-2">
-                          <Link
-                            href={`/publishers/edit/${publisher.id}`}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
-                            title="Edit"
-                          >
-                            <FaRegEdit size={16} />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(publisher.id)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition inline-flex items-center justify-center"
-                            title="Delete"
-                          >
-                            <MdDeleteOutline size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="p-8 text-center text-gray-500">
-                      Data not found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <div className="flex justify-between items-center mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            disabled={page === 1}
-            className="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 inline-flex items-center justify-center"
-            title="Previous"
-          >
-            <GrFormPrevious size={18} />
-          </button>
-          <span className="text-gray-600 text-sm font-medium">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-            disabled={page === totalPages || totalPages === 0}
-            className="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 inline-flex items-center justify-center"
-            title="Next"
-          >
-            <GrFormNext size={18} />
-          </button>
-        </div>
+                    <MdDeleteOutline size={16} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </Table>
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
   );
